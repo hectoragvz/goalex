@@ -98,3 +98,31 @@ should set your DSN to:
 postgres://mydatabase:password@localhost/mydatabase?sslmode=disable.
 
 You can include this as an environment variable or a configuration file.
+
+5. Editing the DB configuration
+
+* As a rule of thumb, you should explicitly set a MaxOpenConns value. This should be
+comfortably below any hard limits on the number of connections imposed by your
+database and infrastructure, and you may also want to consider keeping it fairly low to
+act as a rudimentary throttle.
+For this project we’ll set a MaxOpenConns limit of 25 connections. I’ve found this to be a
+reasonable starting point for small-to-medium web applications and APIs, but ideally
+you should tweak this value for your hardware depending on the results of
+benchmarking and load-testing.
+
+* In general, higher MaxOpenConns and MaxIdleConns values will lead to better
+performance. But the returns are diminishing, and you should be aware that having a
+hectoragvz@gmail.com 19 Apr 2025
+too-large idle connection pool (with connections that are not frequently re-used) can
+actually lead to reduced performance and unnecessary resource consumption.
+Because MaxIdleConns should always be less than or equal to MaxOpenConns, we’ll also
+limit MaxIdleConns to 25 connections for this project.
+
+* To mitigate the risk from point 2 above, you should generally set a ConnMaxIdleTime
+value to remove idle connections that haven’t been used for a long time. In this project
+we’ll set a ConnMaxIdleTime duration of 15 minutes.
+
+* It’s probably OK to leave ConnMaxLifetime as unlimited, unless your database imposes a
+hard limit on connection lifetime, or you need it specifically to facilitate something like
+gracefully swapping databases. Neither of those things apply in this project, so we’ll
+leave this as the default unlimited setting.
